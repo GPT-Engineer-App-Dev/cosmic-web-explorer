@@ -38,8 +38,6 @@
       z-index: 2;
     }
     .planet {
-      width: 80px;
-      height: 80px;
       border-radius: 50%;
       position: absolute;
       cursor: pointer;
@@ -49,6 +47,17 @@
     .planet:hover {
       transform: scale(1.2);
       box-shadow: 0 0 40px currentColor;
+    }
+    #sun {
+      width: 100px;
+      height: 100px;
+      background-color: #ffff00;
+      box-shadow: 0 0 50px #ffff00;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
     }
     #info-panel {
       position: absolute;
@@ -125,11 +134,11 @@
 
   <script>
     const planets = [
-      { name: 'Mercury', color: '#8c7c6d', facts: ['Smallest planet in our solar system', 'Closest to the Sun', 'No moons'] },
-      { name: 'Venus', color: '#fda700', facts: ['Similar in size to Earth', 'Hottest planet in our solar system', 'Rotates backwards compared to most planets'] },
-      { name: 'Earth', color: '#0000ff', facts: ['Only known planet with life', 'Has one moon', '71% of surface is water'] },
-      { name: 'Mars', color: '#ff0000', facts: ['Known as the Red Planet', 'Has the largest volcano in the solar system', 'Has two moons: Phobos and Deimos'] },
-      { name: 'Jupiter', color: '#ffa500', facts: ['Largest planet in our solar system', 'Has a Great Red Spot', 'Has 79 known moons'] }
+      { name: 'Mercury', color: '#8c7c6d', orbitRadius: 100, orbitSpeed: 0.008, size: 10, facts: ['Smallest planet in our solar system', 'Closest to the Sun', 'No moons'] },
+      { name: 'Venus', color: '#fda700', orbitRadius: 140, orbitSpeed: 0.007, size: 15, facts: ['Similar in size to Earth', 'Hottest planet in our solar system', 'Rotates backwards compared to most planets'] },
+      { name: 'Earth', color: '#0000ff', orbitRadius: 180, orbitSpeed: 0.006, size: 16, facts: ['Only known planet with life', 'Has one moon', '71% of surface is water'] },
+      { name: 'Mars', color: '#ff0000', orbitRadius: 220, orbitSpeed: 0.005, size: 14, facts: ['Known as the Red Planet', 'Has the largest volcano in the solar system', 'Has two moons: Phobos and Deimos'] },
+      { name: 'Jupiter', color: '#ffa500', orbitRadius: 300, orbitSpeed: 0.002, size: 30, facts: ['Largest planet in our solar system', 'Has a Great Red Spot', 'Has 79 known moons'] }
     ];
 
     const spaceView = document.getElementById('space-view');
@@ -137,42 +146,46 @@
     const scoreDisplay = document.getElementById('score');
     let score = 0;
 
+    // Create sun
+    const sun = document.createElement('div');
+    sun.id = 'sun';
+    spaceView.appendChild(sun);
+
     function createPlanet(planet) {
       const planetElement = document.createElement('div');
       planetElement.className = 'planet';
       planetElement.style.backgroundColor = planet.color;
       planetElement.style.color = planet.color;
-      planetElement.style.left = `${Math.random() * 90}vw`;
-      planetElement.style.top = `${Math.random() * 90}vh`;
+      planetElement.style.width = `${planet.size}px`;
+      planetElement.style.height = `${planet.size}px`;
       
       planetElement.addEventListener('click', () => {
         infoPanel.innerHTML = `<h3 class="glitch">${planet.name}</h3><ul>${planet.facts.map(fact => `<li class="glitch">${fact}</li>`).join('')}</ul>`;
         score += 10;
         scoreDisplay.textContent = `Score: ${score}`;
-        planetElement.style.transform = 'scale(1.5)';
-        setTimeout(() => planetElement.style.transform = 'scale(1)', 300);
+        planetElement.style.transform = `scale(1.5) translate(-50%, -50%)`;
+        setTimeout(() => planetElement.style.transform = `scale(1) translate(-50%, -50%)`, 300);
       });
 
       spaceView.appendChild(planetElement);
+      return planetElement;
     }
 
-    planets.forEach(createPlanet);
+    const planetElements = planets.map(createPlanet);
 
     function animatePlanets() {
-      document.querySelectorAll('.planet').forEach(planet => {
-        let x = parseFloat(planet.style.left);
-        let y = parseFloat(planet.style.top);
-        
-        x += (Math.random() - 0.5) * 0.5;
-        y += (Math.random() - 0.5) * 0.5;
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
 
-        if (x < 0) x = 90;
-        if (x > 90) x = 0;
-        if (y < 0) y = 90;
-        if (y > 90) y = 0;
+      planetElements.forEach((planetElement, index) => {
+        const planet = planets[index];
+        const angle = Date.now() * planet.orbitSpeed;
+        const x = centerX + Math.cos(angle) * planet.orbitRadius;
+        const y = centerY + Math.sin(angle) * planet.orbitRadius;
 
-        planet.style.left = `${x}vw`;
-        planet.style.top = `${y}vh`;
+        planetElement.style.left = `${x}px`;
+        planetElement.style.top = `${y}px`;
+        planetElement.style.transform = 'translate(-50%, -50%)';
       });
 
       requestAnimationFrame(animatePlanets);
