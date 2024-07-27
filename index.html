@@ -31,22 +31,24 @@
     #space-view {
       width: 100vw;
       height: 100vh;
-      background-color: #000;
-      position: relative;
+      position: absolute;
+      top: 0;
+      left: 0;
       overflow: hidden;
+      z-index: 2;
     }
     .planet {
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       position: absolute;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 0 20px #00ff00;
+      box-shadow: 0 0 20px currentColor;
     }
     .planet:hover {
       transform: scale(1.2);
-      box-shadow: 0 0 40px #00ff00;
+      box-shadow: 0 0 40px currentColor;
     }
     #info-panel {
       position: absolute;
@@ -139,6 +141,7 @@
       const planetElement = document.createElement('div');
       planetElement.className = 'planet';
       planetElement.style.backgroundColor = planet.color;
+      planetElement.style.color = planet.color;
       planetElement.style.left = `${Math.random() * 90}vw`;
       planetElement.style.top = `${Math.random() * 90}vh`;
       
@@ -160,8 +163,8 @@
         let x = parseFloat(planet.style.left);
         let y = parseFloat(planet.style.top);
         
-        x += (Math.random() - 0.5) * 1;
-        y += (Math.random() - 0.5) * 1;
+        x += (Math.random() - 0.5) * 0.5;
+        y += (Math.random() - 0.5) * 0.5;
 
         if (x < 0) x = 90;
         if (x > 90) x = 0;
@@ -176,6 +179,9 @@
     }
 
     animatePlanets();
+
+    // Ensure planets are above the matrix rain
+    spaceView.style.zIndex = '3';
 
     // Matrix rain effect
     const canvas = document.querySelector('.matrix-rain');
