@@ -5,14 +5,18 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z'/%3E%3C/svg%3E" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cosmic Explorer</title>
+  <title>Matrix Cosmic Explorer</title>
   <style>
+    @font-face {
+      font-family: 'Matrix';
+      src: url('https://fonts.cdnfonts.com/css/matrix') format('woff2');
+    }
     body {
-      font-family: 'Courier New', monospace;
+      font-family: 'Matrix', 'Courier New', monospace;
       margin: 0;
       padding: 0;
       background-color: #000;
-      color: #0f0;
+      color: #00ff00;
       overflow: hidden;
     }
     #game-container {
@@ -22,14 +26,14 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
     #space-view {
-      width: 800px;
-      height: 600px;
-      background-color: #000033;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
       position: relative;
       overflow: hidden;
-      border: 2px solid #0f0;
     }
     .planet {
       width: 100px;
@@ -37,35 +41,84 @@
       border-radius: 50%;
       position: absolute;
       cursor: pointer;
-      transition: transform 0.3s;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px #00ff00;
     }
     .planet:hover {
-      transform: scale(1.1);
+      transform: scale(1.2);
+      box-shadow: 0 0 40px #00ff00;
     }
     #info-panel {
-      width: 800px;
-      height: 150px;
-      background-color: #001100;
-      border: 2px solid #0f0;
-      margin-top: 20px;
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: calc(100% - 40px);
+      background-color: rgba(0, 20, 0, 0.8);
+      border: 2px solid #00ff00;
       padding: 10px;
       font-size: 14px;
       overflow-y: auto;
+      max-height: 150px;
+      box-shadow: 0 0 10px #00ff00;
     }
     #score {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 18px;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      text-shadow: 0 0 5px #00ff00;
+    }
+    .matrix-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    @keyframes glitch {
+      0% {
+        text-shadow: 0.05em 0 0 #00fffc, -0.05em -0.025em 0 #fc00ff,
+          0.025em 0.05em 0 #fffc00;
+      }
+      14% {
+        text-shadow: 0.05em 0 0 #00fffc, -0.05em -0.025em 0 #fc00ff,
+          0.025em 0.05em 0 #fffc00;
+      }
+      15% {
+        text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.025em 0 #fc00ff,
+          -0.05em -0.05em 0 #fffc00;
+      }
+      49% {
+        text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.025em 0 #fc00ff,
+          -0.05em -0.05em 0 #fffc00;
+      }
+      50% {
+        text-shadow: 0.025em 0.05em 0 #00fffc, 0.05em 0 0 #fc00ff,
+          0 -0.05em 0 #fffc00;
+      }
+      99% {
+        text-shadow: 0.025em 0.05em 0 #00fffc, 0.05em 0 0 #fc00ff,
+          0 -0.05em 0 #fffc00;
+      }
+      100% {
+        text-shadow: -0.025em 0 0 #00fffc, -0.025em -0.025em 0 #fc00ff,
+          -0.025em -0.05em 0 #fffc00;
+      }
+    }
+    .glitch {
+      animation: glitch 1s linear infinite;
     }
   </style>
 </head>
 
 <body>
+  <canvas class="matrix-rain"></canvas>
   <div id="game-container">
     <div id="space-view"></div>
     <div id="info-panel"></div>
-    <div id="score">Score: 0</div>
+    <div id="score" class="glitch">Score: 0</div>
   </div>
 
   <script>
@@ -86,13 +139,15 @@
       const planetElement = document.createElement('div');
       planetElement.className = 'planet';
       planetElement.style.backgroundColor = planet.color;
-      planetElement.style.left = `${Math.random() * 700}px`;
-      planetElement.style.top = `${Math.random() * 500}px`;
+      planetElement.style.left = `${Math.random() * 90}vw`;
+      planetElement.style.top = `${Math.random() * 90}vh`;
       
       planetElement.addEventListener('click', () => {
-        infoPanel.innerHTML = `<h3>${planet.name}</h3><ul>${planet.facts.map(fact => `<li>${fact}</li>`).join('')}</ul>`;
+        infoPanel.innerHTML = `<h3 class="glitch">${planet.name}</h3><ul>${planet.facts.map(fact => `<li class="glitch">${fact}</li>`).join('')}</ul>`;
         score += 10;
         scoreDisplay.textContent = `Score: ${score}`;
+        planetElement.style.transform = 'scale(1.5)';
+        setTimeout(() => planetElement.style.transform = 'scale(1)', 300);
       });
 
       spaceView.appendChild(planetElement);
@@ -105,22 +160,64 @@
         let x = parseFloat(planet.style.left);
         let y = parseFloat(planet.style.top);
         
-        x += (Math.random() - 0.5) * 2;
-        y += (Math.random() - 0.5) * 2;
+        x += (Math.random() - 0.5) * 1;
+        y += (Math.random() - 0.5) * 1;
 
-        if (x < 0) x = 0;
-        if (x > 700) x = 700;
-        if (y < 0) y = 0;
-        if (y > 500) y = 500;
+        if (x < 0) x = 90;
+        if (x > 90) x = 0;
+        if (y < 0) y = 90;
+        if (y > 90) y = 0;
 
-        planet.style.left = `${x}px`;
-        planet.style.top = `${y}px`;
+        planet.style.left = `${x}vw`;
+        planet.style.top = `${y}vh`;
       });
 
       requestAnimationFrame(animatePlanets);
     }
 
     animatePlanets();
+
+    // Matrix rain effect
+    const canvas = document.querySelector('.matrix-rain');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const nums = '0123456789';
+
+    const alphabet = katakana + latin + nums;
+
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+
+    const rainDrops = [];
+
+    for (let x = 0; x < columns; x++) {
+      rainDrops[x] = 1;
+    }
+
+    const draw = () => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0f0';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < rainDrops.length; i++) {
+        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+        if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          rainDrops[i] = 0;
+        }
+        rainDrops[i]++;
+      }
+    };
+
+    setInterval(draw, 30);
   </script>
 </body>
 
